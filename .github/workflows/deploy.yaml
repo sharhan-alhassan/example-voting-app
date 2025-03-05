@@ -57,12 +57,6 @@ jobs:
         run: |
           time=$(date +'%T')
           echo "date=$(date +'%m-%d-%Y')-${time//:/-}" >> $GITHUB_OUTPUT
-      
-      # - name: Get Current Date
-      #   id: current-date
-      #   run: |
-      #     time=$(date +'%T')
-      #     echo "::set-output name=date::$(date +'%m-%d-%Y')-${time//:/-}"
 
       # Build and push Vote image
       - name: Build and Push Vote Image
@@ -168,19 +162,13 @@ jobs:
 
       - name: Update values.yaml with new image tags
         run: |
-          sed -i "s|^\( *image: \).*examplevotingapp_vote.*$|\1${{ steps.vote-image.outputs.image }}|" voting-app/values.yaml
-          sed -i "s|^\( *image: \).*examplevotingapp_result.*$|\1${{ steps.result-image.outputs.image }}|" voting-app/values.yaml
-          sed -i "s|^\( *image: \).*examplevotingapp_worker.*$|\1${{ steps.worker-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "/^vote:/,/image:/s|^\( *image: \).*|\1${{ steps.vote-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "/^result:/,/image:/s|^\( *image: \).*|\1${{ steps.result-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "/^worker:/,/image:/s|^\( *image: \).*|\1${{ steps.worker-image.outputs.image }}|" voting-app/values.yaml
+
 
       - name: Show values.yaml after update
         run: cat voting-app/values.yaml
-
-      # - name: Checkout master branch
-      #   uses: actions/checkout@v4
-      #   with:
-      #     ref: master
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     fetch-depth: 0
 
       # Commit and push the updated values.yaml
       - name: Commit and Push updated values.yaml

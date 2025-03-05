@@ -104,12 +104,10 @@ jobs:
           echo "📄 Grype scan JSON output for Vote image:"
           cat grype-vote-report.json
 
-      # - name: Upload Vote Scan Report to S3
-      #   env:
-      #     AWS_REGION: ${{ env.AWS_REGION }}
-      #   run: |
-      #     TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
-      #     aws s3 cp grype-vote-report.json s3://your-s3-bucket-name/reports/vote/grype-vote-report-$TIMESTAMP.json
+      - name: Upload Vote Scan Report to S3
+        run: |
+          TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
+          aws s3 cp grype-vote-report.json s3://bionconsult-scan-images-bucket/reports/vote/grype-vote-report-$TIMESTAMP.json
 
 
       ############################# RESULT IMAGE
@@ -126,10 +124,10 @@ jobs:
           echo "📄 Grype scan JSON output for Result image:"
           cat grype-result-report.json
 
-      # - name: Upload Result Scan Report to S3
-      #   run: |
-      #     TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
-      #     aws s3 cp grype-result-report.json s3://your-s3-bucket-name/reports/result/grype-result-report-$TIMESTAMP.json
+      - name: Upload Result Scan Report to S3
+        run: |
+          TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
+          aws s3 cp grype-result-report.json s3://bionconsult-scan-images-bucket/reports/result/grype-result-report-$TIMESTAMP.json
 
       ############################# WORKER IMAGE
       - name: Scan Worker Image with Grype
@@ -145,10 +143,10 @@ jobs:
           echo "📄 Grype scan JSON output for Worker image:"
           cat grype-worker-report.json
 
-      # - name: Upload Worker Scan Report to S3
-      #   run: |
-      #     TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
-      #     aws s3 cp grype-worker-report.json s3://your-s3-bucket-name/reports/worker/grype-worker-report-$TIMESTAMP.json
+      - name: Upload Worker Scan Report to S3
+        run: |
+          TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
+          aws s3 cp grype-worker-report.json s3://bionconsult-scan-images-bucket/reports/worker/grype-worker-report-$TIMESTAMP.json
 
 
 

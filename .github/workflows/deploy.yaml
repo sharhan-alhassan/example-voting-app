@@ -15,8 +15,15 @@ jobs:
       WORKER_REPO_NAME: worker
 
     steps:
-      - name: Checkout
+      # - name: Checkout
+      #   uses: actions/checkout@v4
+
+      - name: Checkout master branch
         uses: actions/checkout@v4
+        with:
+          ref: master
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -45,17 +52,17 @@ jobs:
         with:
           DOCKER_REPO_NAME: ${{ env.WORKER_REPO_NAME }}
 
-      # - name: Get Current Date
-      #   id: current-date
-      #   run: |
-      #     time=$(date +'%T')
-      #     echo "date=$(date +'%m-%d-%Y')-${time//:/-}" >> $GITHUB_OUTPUT
-      
       - name: Get Current Date
         id: current-date
         run: |
           time=$(date +'%T')
-          echo "::set-output name=date::$(date +'%m-%d-%Y')-${time//:/-}"
+          echo "date=$(date +'%m-%d-%Y')-${time//:/-}" >> $GITHUB_OUTPUT
+      
+      # - name: Get Current Date
+      #   id: current-date
+      #   run: |
+      #     time=$(date +'%T')
+      #     echo "::set-output name=date::$(date +'%m-%d-%Y')-${time//:/-}"
 
       # Build and push Vote image
       - name: Build and Push Vote Image
@@ -185,12 +192,3 @@ jobs:
           git add voting-app/values.yaml
           git commit -m "chore: update images in values.yaml [skip ci]" || echo "No changes to commit"
           git push origin master
-
-#       - name: Deploy Voting App with Helm
-#         run: |
-#           helm upgrade --install voting-app ./helm-chart \
-#             --namespace voting-app \
-#             --create-namespace \
-#             --set vote.image=${{ steps.vote-image.outputs.image }} \
-#             --set result.image=${{ steps.result-image.outputs.image }} \
-#             --set worker.image=${{ steps.worker-image.outputs.image }}

@@ -84,18 +84,24 @@ jobs:
           docker push $ECR_REGISTRY/${{ env.WORKER_REPO_NAME }}:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/${{ env.WORKER_REPO_NAME }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # Update values.yaml with new images
+      - name: Show values.yaml before update
+        run: cat voting-app/values.yaml
+
       - name: Update values.yaml with new image tags
         run: |
-          sed -i "s|^\( *image: \).*vote.*$|\1${{ steps.vote-image.outputs.image }}|" voting-app/values.yaml
-          sed -i "s|^\( *image: \).*result.*$|\1${{ steps.result-image.outputs.image }}|" voting-app/values.yaml
-          sed -i "s|^\( *image: \).*worker.*$|\1${{ steps.worker-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "s|^\( *image: \).*examplevotingapp_vote.*$|\1${{ steps.vote-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "s|^\( *image: \).*examplevotingapp_result.*$|\1${{ steps.result-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "s|^\( *image: \).*examplevotingapp_worker.*$|\1${{ steps.worker-image.outputs.image }}|" voting-app/values.yaml
+
+      - name: Show values.yaml after update
+        run: cat voting-app/values.yaml
 
       - name: Checkout master branch
         uses: actions/checkout@v4
         with:
           ref: master
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       # Commit and push the updated values.yaml
       - name: Commit and Push updated values.yaml

@@ -14,21 +14,21 @@ redis:
 vote:
   name: vote
   replicas: 1
-  image: 170673730974.dkr.ecr.us-west-1.amazonaws.com/vote:03-05-2025-14-14-49
+  image: 170673730974.dkr.ecr.us-west-1.amazonaws.com/vote:03-05-2025-15-35-43
   containerPort: 80
   servicePort: 8080
 
 result:
   name: result
   replicas: 1
-  image: 170673730974.dkr.ecr.us-west-1.amazonaws.com/result:03-05-2025-14-14-49
+  image: 170673730974.dkr.ecr.us-west-1.amazonaws.com/result:03-05-2025-15-35-43
   containerPort: 80
   servicePort: 8081
 
 worker:
   name: worker
   replicas: 1
-  image: 170673730974.dkr.ecr.us-west-1.amazonaws.com/worker:03-05-2025-14-14-49
+  image: 170673730974.dkr.ecr.us-west-1.amazonaws.com/worker:03-05-2025-15-35-43
 
 ingress:
   host: aab04b4803b0e4a22af6a6c3a3f0bff1-de3ab080b1fc67bb.elb.us-west-1.amazonaws.com

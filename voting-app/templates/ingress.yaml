@@ -25,3 +25,10 @@ spec:
             name: {{ .Values.result.name }}
             port:
               number: {{ .Values.result.servicePort }}
+      - path: /argocd
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Values.result.name }}
+            port:
+              number: {{ .Values.result.servicePort }}

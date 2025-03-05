@@ -33,6 +33,10 @@ worker:
 ingress:
   host: aab04b4803b0e4a22af6a6c3a3f0bff1-de3ab080b1fc67bb.elb.us-west-1.amazonaws.com
 
+argocd:
+  name: argocd-server
+  servicePort: 443 
+  
 namespace:
   voting-app
 

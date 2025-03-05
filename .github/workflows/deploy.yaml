@@ -1,0 +1,110 @@
+name: voting-app
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-west-1
+      EKS_CLUSTER_NAME_PROD: bionconsult-production
+      VOTE_REPO_NAME: vote
+      RESULT_REPO_NAME: result
+      WORKER_REPO_NAME: worker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Create ECR repos for vote, result, and worker
+      - name: Create Vote ECR repo if necessary
+        uses: byu-oit/github-action-create-ecr-repo-if-missing@v1
+        with:
+          DOCKER_REPO_NAME: ${{ env.VOTE_REPO_NAME }}
+
+      - name: Create Result ECR repo if necessary
+        uses: byu-oit/github-action-create-ecr-repo-if-missing@v1
+        with:
+          DOCKER_REPO_NAME: ${{ env.RESULT_REPO_NAME }}
+
+      - name: Create Worker ECR repo if necessary
+        uses: byu-oit/github-action-create-ecr-repo-if-missing@v1
+        with:
+          DOCKER_REPO_NAME: ${{ env.WORKER_REPO_NAME }}
+
+      - name: Get Current Date
+        id: current-date
+        run: |
+          time=$(date +'%T')
+          echo "date=$(date +'%m-%d-%Y')-${time//:/-}" >> $GITHUB_OUTPUT
+
+      # Build and push Vote image
+      - name: Build and Push Vote Image
+        id: vote-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.current-date.outputs.date }}
+        run: |
+          docker build -f vote/Dockerfile -t $ECR_REGISTRY/${{ env.VOTE_REPO_NAME }}:$IMAGE_TAG vote/
+          docker push $ECR_REGISTRY/${{ env.VOTE_REPO_NAME }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.VOTE_REPO_NAME }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # Build and push Result image
+      - name: Build and Push Result Image
+        id: result-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.current-date.outputs.date }}
+        run: |
+          docker build -f result/Dockerfile -t $ECR_REGISTRY/${{ env.RESULT_REPO_NAME }}:$IMAGE_TAG result/
+          docker push $ECR_REGISTRY/${{ env.RESULT_REPO_NAME }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.RESULT_REPO_NAME }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # Build and push Worker image
+      - name: Build and Push Worker Image
+        id: worker-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.current-date.outputs.date }}
+        run: |
+          docker build -f worker/Dockerfile -t $ECR_REGISTRY/${{ env.WORKER_REPO_NAME }}:$IMAGE_TAG worker/
+          docker push $ECR_REGISTRY/${{ env.WORKER_REPO_NAME }}:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/${{ env.WORKER_REPO_NAME }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # Update values.yaml with new images
+      - name: Update values.yaml with new image tags
+        run: |
+          sed -i "s|^\( *image: \).*vote.*$|\1${{ steps.vote-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "s|^\( *image: \).*result.*$|\1${{ steps.result-image.outputs.image }}|" voting-app/values.yaml
+          sed -i "s|^\( *image: \).*worker.*$|\1${{ steps.worker-image.outputs.image }}|" voting-app/values.yaml
+
+      # Commit and push the updated values.yaml
+      - name: Commit and Push updated values.yaml
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add voting-app/values.yaml
+          git commit -m "chore: update images in values.yaml [skip ci]"
+          git push
+
+#       - name: Deploy Voting App with Helm
+#         run: |
+#           helm upgrade --install voting-app ./helm-chart \
+#             --namespace voting-app \
+#             --create-namespace \
+#             --set vote.image=${{ steps.vote-image.outputs.image }} \
+#             --set result.image=${{ steps.result-image.outputs.image }} \
+#             --set worker.image=${{ steps.worker-image.outputs.image }}

@@ -31,7 +31,7 @@ worker:
   image: dockersamples/examplevotingapp_worker
 
 ingress:
-  host: a0d02efbb8ea34b5aa90eeda67095220-6e422b5991707334.elb.us-west-1.amazonaws.com
+  host: aab04b4803b0e4a22af6a6c3a3f0bff1-de3ab080b1fc67bb.elb.us-west-1.amazonaws.com
 
 namespace:
   voting-app

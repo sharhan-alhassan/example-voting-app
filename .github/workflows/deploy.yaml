@@ -45,11 +45,17 @@ jobs:
         with:
           DOCKER_REPO_NAME: ${{ env.WORKER_REPO_NAME }}
 
+      # - name: Get Current Date
+      #   id: current-date
+      #   run: |
+      #     time=$(date +'%T')
+      #     echo "date=$(date +'%m-%d-%Y')-${time//:/-}" >> $GITHUB_OUTPUT
+      
       - name: Get Current Date
         id: current-date
         run: |
           time=$(date +'%T')
-          echo "date=$(date +'%m-%d-%Y')-${time//:/-}" >> $GITHUB_OUTPUT
+          echo "::set-output name=date::$(date +'%m-%d-%Y')-${time//:/-}"
 
       # Build and push Vote image
       - name: Build and Push Vote Image

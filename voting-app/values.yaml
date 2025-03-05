@@ -1,0 +1,40 @@
+db:
+  name: db
+  replicas: 1
+  image: postgres:15-alpine
+  postgresUser: postgres
+  postgresPassword: postgres
+  containerPort: 5432
+
+redis:
+  name: redis
+  replicas: 1
+  image: redis:alpine
+
+vote:
+  name: vote
+  replicas: 1
+  image: dockersamples/examplevotingapp_vote
+  containerPort: 80
+  servicePort: 8080
+
+result:
+  name: result
+  replicas: 1
+  image: dockersamples/examplevotingapp_result
+  containerPort: 80
+  servicePort: 8081
+
+worker:
+  name: worker
+  replicas: 1
+  image: dockersamples/examplevotingapp_worker
+
+ingress:
+  host: a0d02efbb8ea34b5aa90eeda67095220-6e422b5991707334.elb.us-west-1.amazonaws.com
+
+namespace:
+  voting-app
+
+service:
+  type: ClusterIP

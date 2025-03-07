@@ -4,31 +4,40 @@ metadata:
   name: voting-app-ingress
   namespace: {{ .Values.namespace }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    alb.ingress.kubernetes.io/healthcheck-path: "/"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/tags: Environment=production
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/security-groups: sg-00b04679eda370c5d
+    alb.ingress.kubernetes.io/subnets: subnet-045d8d5c58147e21c, subnet-001c14c8b6ed47a16
+    alb.ingress.kubernetes.io/healthcheck-port: "traffic-port"
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "60"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "30"
+    alb.ingress.kubernetes.io/success-codes: "200"
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
   rules:
-  - host: {{ .Values.ingress.host }}
-    http:
-      paths:
-      - path: /vote
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ .Values.vote.name }}
-            port:
-              number: {{ .Values.vote.servicePort }}
-      - path: /result
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ .Values.result.name }}
-            port:
-              number: {{ .Values.result.servicePort }}
-      - path: /argocd
-        pathType: Prefix
-        backend:
-          service:
-            name: {{ .Values.result.name }}
-            port:
-              number: {{ .Values.result.servicePort }}
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.vote.name }}
+                port:
+                  number: {{ .Values.vote.servicePort }}
+          - path: /vote
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.vote.name }}
+                port:
+                  number: {{ .Values.vote.servicePort }}
+          - path: /result
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.result.name }}
+                port:
+                  number: {{ .Values.result.servicePort }}
